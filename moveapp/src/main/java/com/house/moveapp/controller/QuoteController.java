@@ -10,7 +10,7 @@ import com.house.moveapp.model.QuoteRequest;
 import com.house.moveapp.service.QuoteService;
 
 @RestController
-@RequestMapping("api/quotes")
+@RequestMapping("/api/quotes")
 public class QuoteController {
 	   @Autowired
 	private QuoteService quoteService;
