@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Services — HouseMovers</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <a class="brand" href="/"><span class="logo">
+      <svg width="28" height="28" viewBox="0 0 24 24"><path d="M2 12l10-9 10 9h-5v9h-10v-9h-5z" fill="#fff"/></svg>
+    </span><h1>HouseMovers</h1></a>
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="/estimate">Estimate</a>
+      <a href="/quote">Request Quote</a>
+      <a href="/services" class="cta-btn">Services</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <main>
+    <section class="hero">
+      <div class="hero-left">
+        <h2>Our Professional Moving Services</h2>
+        <p>We provide safe, efficient, and reliable moving services for residential and commercial customers. Explore our offerings below.</p>
+      </div>
+      <div class="hero-visual">
+        <img src="https://images.unsplash.com/photo-1611599537125-9d1c5b4c8f05?auto=format&fit=crop&w=800&q=80" alt="moving services"/>
+      </div>
+    </section>
+
+    <!-- Services Cards -->
+    <section class="section">
+      <h3>What We Offer</h3>
+      <div class="cards" role="list">
+        <article class="card" role="listitem">
+          <h4>Local Moving</h4>
+          <p>Fast, friendly, and fully insured local moves with transparent pricing.</p>
+        </article>
+
+        <article class="card">
+          <h4>Long Distance Moving</h4>
+          <p>State-to-state moving with scheduled pickup and guaranteed delivery windows.</p>
+        </article>
+
+        <article class="card">
+          <h4>Packing & Storage</h4>
+          <p>Professional packing, fragile-item protection, and secure storage options.</p>
+        </article>
+
+        <article class="card">
+          <h4>Commercial Relocation</h4>
+          <p>Efficient office and business moving solutions with minimal downtime.</p>
+        </article>
+
+        <article class="card">
+          <h4>Specialty Items</h4>
+          <p>We handle pianos, antiques, and other delicate or high-value items safely.</p>
+        </article>
+
+        <article class="card">
+          <h4>Insurance & Support</h4>
+          <p>All moves are insured, and our customer support is available to guide you every step.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- CTA Strip -->
+    <section class="cta-strip" role="region" aria-label="Get estimate">
+      <div class="left">
+        <h4>Ready to move?</h4>
+        <p>Get a fast moving estimate and plan your move with confidence today.</p>
+      </div>
+      <div>
+        <a class="cta-btn" href="/estimate">Get Estimate</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">© 2025 HouseMovers — All rights reserved.</footer>
+
+  <!-- Scroll shrink JS -->
+  <script>
+    window.addEventListener('scroll', function() {
+      const header = document.querySelector('.site-header');
+      if(window.scrollY > 50){
+        header.classList.add('shrink');
+      } else {
+        header.classList.remove('shrink');
+      }
+    });
+  </script>
+</body>
+</html>
