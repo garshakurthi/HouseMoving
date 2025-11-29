@@ -17,10 +17,10 @@ public class QuoteServiceImpl implements QuoteService{
     private EstimateService estimateService;
     
     public QuoteRequest createQuote(QuoteRequest req) {
-    	
+    	  
     	 double estimatedPrice = estimateService.calculateEstimate(
                  req.getHouseSize(),
-                10.0 // placeholder for distance, can be replaced with real logic
+                 req.getDistanceMiles()
          );
     	 req.setEstimatedPrice(estimatedPrice);
          return quoteRepo.save(req);

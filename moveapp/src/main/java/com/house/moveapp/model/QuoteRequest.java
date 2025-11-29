@@ -14,10 +14,12 @@ public class QuoteRequest {
 	private Long id;
 	private String pickupAddress;
     private String dropAddress;
+    private double distanceMiles;
     private String houseSize;       // 1BHK, 2BHK, 3BHK
     private LocalDate movingDate;
     private String instructions;
     private Double estimatedPrice;
+    
     @ManyToOne
     private Customer customer;
 }
