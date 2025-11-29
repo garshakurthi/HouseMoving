@@ -19,5 +19,9 @@ public class ViewController {
 	    public String quotePage() {
 	        return "quote";
 	    }
+	    @GetMapping("/services")
+	    public String servicesPage() {
+	        return "services"; 
+	    }
 
 }
