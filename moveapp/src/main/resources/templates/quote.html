@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -7,11 +7,24 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
+  <!-- Header -->
   <header class="site-header">
-    <a class="brand" href="/"><span class="logo"><svg width="28" height="28"><path d="M2 12l10-9 10 9h-5v9h-10v-9h-5z" fill="#fff"/></svg></span><h1>HouseMovers</h1></a>
-    <nav class="nav-links"><a href="/">Home</a><a href="/estimate">Estimate</a><a href="/services">Services</a></nav>
+    <a class="brand" href="/">
+      <span class="logo">
+        <svg width="28" height="28">
+          <path d="M2 12l10-9 10 9h-5v9h-10v-9h-5z" fill="#fff"/>
+        </svg>
+      </span>
+      <h1>HouseMovers</h1>
+    </a>
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="/estimate">Estimate</a>
+      <a href="/services">Services</a>
+    </nav>
   </header>
 
+  <!-- Main Quote Form -->
   <main class="section">
     <div class="form-card">
       <h3>Request a Quote</h3>
@@ -34,7 +47,12 @@
       <div class="form-row">
         <div class="form-col">
           <label for="houseSize">House size</label>
-          <select id="houseSize"><option>1BHK</option><option>2BHK</option><option>3BHK</option><option>Villa</option></select>
+          <select id="houseSize">
+            <option>1BHK</option>
+            <option>2BHK</option>
+            <option>3BHK</option>
+            <option>Villa</option>
+          </select>
         </div>
         <div class="form-col">
           <label for="distance">Distance (miles)</label>
@@ -50,57 +68,65 @@
 
       <button class="submit" id="submitQuote">Submit Quote</button>
 
-      <div id="quoteSuccess" class="success">Quote submitted — <span id="quotePrice"></span></div>
-      <div id="quoteError" class="error">Error submitting quote — please try again.</div>
+      <div id="quoteSuccess" class="success" style="display:none">
+        Quote submitted — <span id="quotePrice"></span>
+      </div>
+      <div id="quoteError" class="error" style="display:none">
+        Error submitting quote — please try again.
+      </div>
     </div>
   </main>
 
-<script>
-document.getElementById('submitQuote').addEventListener('click', async function(){
-  const success = document.getElementById('quoteSuccess');
-  const err = document.getElementById('quoteError');
-  success.style.display='none'; err.style.display='none';
+  <!-- JS -->
+  <script>
+    document.getElementById('submitQuote').addEventListener('click', async function() {
+      const success = document.getElementById('quoteSuccess');
+      const err = document.getElementById('quoteError');
+      success.style.display = 'none';
+      err.style.display = 'none';
 
-  const payload = {
-    pickupAddress: document.getElementById('pickup').value,
-    dropAddress: document.getElementById('drop').value,
-    houseSize: document.getElementById('houseSize').value,
-    movingDate: document.getElementById('date').value,
-    instructions: document.getElementById('instructions').value,
-    customer: {
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
-      phone: document.getElementById('phone').value
-    }
-  };
+      const distanceVal = Number(document.getElementById('distance').value);
+      if (!distanceVal || distanceVal <= 0) {
+        alert('Enter a valid distance');
+        return;
+      }
 
-  // simple validation
-  if(!payload.customer.name || !payload.customer.email){ alert('Name and email required'); return; }
+      const payload = {
+        pickupAddress: document.getElementById('pickup').value,
+        dropAddress: document.getElementById('drop').value,
+        houseSize: document.getElementById('houseSize').value,
+        distanceMiles: distanceVal,
+        movingDate: document.getElementById('date').value,
+        instructions: document.getElementById('instructions').value,
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value
+      };
 
-  try{
-    // get estimate first (backend returns bare number)
-    const estRes = await fetch(`/api/estimate?houseSize=${encodeURIComponent(payload.houseSize)}&distanceMiles=${encodeURIComponent(document.getElementById('distance').value || 0)}`);
-    const estPriceText = await estRes.text();
-    payload.estimatedPrice = parseFloat(estPriceText) || 0;
+      if (!payload.name || !payload.email) {
+        alert('Name and email required');
+        return;
+      }
 
-    const res = await fetch('/api/quotes', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify(payload)
+      try {
+        const res = await fetch('/api/quotes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('post failed');
+
+        const saved = await res.json();
+        const price = saved.estimatedPrice !== undefined ? Number(saved.estimatedPrice).toFixed(2) : 0;
+
+        document.getElementById('quotePrice').innerText = `$${price}`;
+        success.style.display = 'block';
+      } catch (e) {
+        console.error(e);
+        err.style.display = 'block';
+      }
     });
-
-    if(!res.ok) throw new Error('post failed');
-
-    const saved = await res.json(); // backend returns QuoteRequest object
-    const price = saved.estimatedPrice !== undefined ? Number(saved.estimatedPrice).toFixed(2) : payload.estimatedPrice.toFixed(2);
-
-    document.getElementById('quotePrice').innerText = `$${price}`;
-    success.style.display='block';
-  }catch(e){
-    console.error(e);
-    err.style.display='block';
-  }
-});
-</script>
+  </script>
 </body>
 </html>
