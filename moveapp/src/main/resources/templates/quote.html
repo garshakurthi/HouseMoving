@@ -1,79 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>MoveApp Quote</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Request Quote — HouseMovers</title>
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-<h1>Request a Moving Quote</h1>
+  <header class="site-header">
+    <a class="brand" href="/"><span class="logo"><svg width="28" height="28"><path d="M2 12l10-9 10 9h-5v9h-10v-9h-5z" fill="#fff"/></svg></span><h1>HouseMovers</h1></a>
+    <nav class="nav-links"><a href="/">Home</a><a href="/estimate">Estimate</a><a href="/services">Services</a></nav>
+  </header>
 
-<form id="quoteForm">
-    <label>Name: <input type="text" id="name" required></label><br>
-    <label>Email: <input type="email" id="email" required></label><br>
-    <label>Phone: <input type="text" id="phone" required></label><br>
-    <label>Pickup Address: <input type="text" id="pickupAddress" required></label><br>
-    <label>Drop Address: <input type="text" id="dropAddress" required></label><br>
-    <label>House Size: 
-        <select id="houseSize">
-            <option value="1BHK">1BHK</option>
-            <option value="2BHK">2BHK</option>
-            <option value="3BHK">3BHK</option>
-        </select>
-    </label><br>
-    <label>Moving Date: <input type="date" id="movingDate" required></label><br>
-    <label>Instructions: <textarea id="instructions"></textarea></label><br>
-    <button type="submit">Submit Quote</button>
-</form>
+  <main class="section">
+    <div class="form-card">
+      <h3>Request a Quote</h3>
 
-<p id="quoteResult"></p>
+      <label for="name">Full name</label>
+      <input id="name" type="text" placeholder="John Doe">
+
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="you@example.com">
+
+      <label for="phone">Phone</label>
+      <input id="phone" type="text" placeholder="(555) 555-5555">
+
+      <label for="pickup">Pickup address</label>
+      <input id="pickup" type="text">
+
+      <label for="drop">Drop address</label>
+      <input id="drop" type="text">
+
+      <div class="form-row">
+        <div class="form-col">
+          <label for="houseSize">House size</label>
+          <select id="houseSize"><option>1BHK</option><option>2BHK</option><option>3BHK</option><option>Villa</option></select>
+        </div>
+        <div class="form-col">
+          <label for="distance">Distance (miles)</label>
+          <input id="distance" type="number" min="1">
+        </div>
+      </div>
+
+      <label for="date">Moving date</label>
+      <input id="date" type="date">
+
+      <label for="instructions">Instructions</label>
+      <textarea id="instructions"></textarea>
+
+      <button class="submit" id="submitQuote">Submit Quote</button>
+
+      <div id="quoteSuccess" class="success">Quote submitted — <span id="quotePrice"></span></div>
+      <div id="quoteError" class="error">Error submitting quote — please try again.</div>
+    </div>
+  </main>
 
 <script>
-const quoteForm = document.getElementById("quoteForm");
+document.getElementById('submitQuote').addEventListener('click', async function(){
+  const success = document.getElementById('quoteSuccess');
+  const err = document.getElementById('quoteError');
+  success.style.display='none'; err.style.display='none';
 
-quoteForm.addEventListener("submit", async function(event) {
-    event.preventDefault();
-
-    const payload = {
-        customer: {
-            name: document.getElementById("name").value,
-            email: document.getElementById("email").value,
-            phone: document.getElementById("phone").value
-        },
-        pickupAddress: document.getElementById("pickupAddress").value,
-        dropAddress: document.getElementById("dropAddress").value,
-        houseSize: document.getElementById("houseSize").value,
-        movingDate: document.getElementById("movingDate").value,
-        instructions: document.getElementById("instructions").value
-    };
-
-    try {
-        const response = await fetch("/api/quotes", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            throw new Error("Network response was not ok");
-        }
-
-        const data = await response.json();
-
-        // Make sure estimatedPrice exists
-        if (data.estimatedPrice !== undefined) {
-            document.getElementById("quoteResult").innerText =
-                `Quote submitted! Estimated price: $${data.estimatedPrice.toFixed(2)}`;
-        } else {
-            document.getElementById("quoteResult").innerText =
-                "Quote submitted but estimated price is missing!";
-        }
-
-    } catch (error) {
-        console.error(error);
-        document.getElementById("quoteResult").innerText = "Error submitting quote.";
+  const payload = {
+    pickupAddress: document.getElementById('pickup').value,
+    dropAddress: document.getElementById('drop').value,
+    houseSize: document.getElementById('houseSize').value,
+    movingDate: document.getElementById('date').value,
+    instructions: document.getElementById('instructions').value,
+    customer: {
+      name: document.getElementById('name').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value
     }
+  };
+
+  // simple validation
+  if(!payload.customer.name || !payload.customer.email){ alert('Name and email required'); return; }
+
+  try{
+    // get estimate first (backend returns bare number)
+    const estRes = await fetch(`/api/estimate?houseSize=${encodeURIComponent(payload.houseSize)}&distanceMiles=${encodeURIComponent(document.getElementById('distance').value || 0)}`);
+    const estPriceText = await estRes.text();
+    payload.estimatedPrice = parseFloat(estPriceText) || 0;
+
+    const res = await fetch('/api/quotes', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if(!res.ok) throw new Error('post failed');
+
+    const saved = await res.json(); // backend returns QuoteRequest object
+    const price = saved.estimatedPrice !== undefined ? Number(saved.estimatedPrice).toFixed(2) : payload.estimatedPrice.toFixed(2);
+
+    document.getElementById('quotePrice').innerText = `$${price}`;
+    success.style.display='block';
+  }catch(e){
+    console.error(e);
+    err.style.display='block';
+  }
 });
 </script>
-
 </body>
 </html>
